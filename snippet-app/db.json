@@ -1,0 +1,5 @@
+{
+  "snippets": [
+    { "id": 1, "title": "Mock Snippet", "code": "console.log('Mock!');", "language": "JavaScript" }
+  ]
+}
