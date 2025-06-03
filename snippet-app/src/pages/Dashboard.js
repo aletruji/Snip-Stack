@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sun, Moon, Copy, Plus, Trash2, Edit, Maximize, Minimize  } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../api"
+import CodeEditor from "@uiw/react-textarea-code-editor";
+
 
 
 
@@ -24,6 +26,14 @@ function Dashboard() {
 const [editedCode, setEditedCode] = useState("");
 const [searchTerm, setSearchTerm] = useState("");
 const [expandedSnippet, setExpandedSnippet] = useState(null);
+const [modalEditMode, setModalEditMode] = useState(false);
+const editRef = useRef(null);
+const smallEditRef = useRef(null);
+const backgroundColor = darkMode ? "#374151" : "#ffffff"; // Tailwind: gray-800 vs gray-100
+
+
+
+
 
 
 
@@ -67,6 +77,25 @@ const handleSaveSnippet = async (id) => {
   }
 };
 
+useEffect(() => {
+  const handleClickOutsideEdit = (e) => {
+    if (
+      editingSnippetId !== null &&
+      !(
+        (editRef.current && editRef.current.contains(e.target)) ||
+        (smallEditRef.current && smallEditRef.current.contains(e.target))
+      )
+    ) {
+      setEditingSnippetId(null);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutsideEdit);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutsideEdit);
+  };
+}, [editingSnippetId]);
+
 
 
   
@@ -106,6 +135,7 @@ useEffect(() => {
     .then(res => setLanguages(res.data))
     .catch(err => console.error("Sprachen-Laden-Fehler:", err));
 }, [email]);
+
 
 
 
@@ -313,22 +343,38 @@ const handleAddLanguage = async () => {
   .map((snip, idx) => (
              <div
   key={idx}
-  onDoubleClick={() => setExpandedSnippet(snip)}
-  className="bg-gray-100 dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col justify-between min-h-[220px]"
+  onDoubleClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setExpandedSnippet(snip);
+}} // here we have outter frame of the minimilized snipped
+  className="select-none bg-gray-100 dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col justify-between min-h-[220px]"
 >
   {editingSnippetId === snip.id ? (
-    <>
+    <div ref={smallEditRef}>
       <input
         type="text"
         value={editedTitle}
         onChange={(e) => setEditedTitle(e.target.value)}
         className="w-full mb-2 p-2 rounded bg-white dark:bg-gray-700 text-black dark:text-white"
       />
-      <textarea
-        value={editedCode}
-        onChange={(e) => setEditedCode(e.target.value)}
-        className="w-full mb-2 p-2 rounded bg-gray-100 dark:bg-gray-700 text-black dark:text-white h-32"
-      />
+      <CodeEditor
+  value={editedCode}
+  language={snip.language.toLowerCase()}
+
+  placeholder="Code eingeben..."
+  onChange={(e) => setEditedCode(e.target.value)}
+  padding={15}
+  className="rounded bg-gray-100 dark:bg-gray-700 text-black dark:text-white scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+  style={{
+    fontSize: 13,
+    fontFamily: 'ui-monospace, SFMono-Regular, SF Mono, Consolas, Liberation Mono, Menlo, monospace',
+    height: '8rem',
+    overflowY: 'auto',
+    backgroundColor,
+    
+  }}
+/>
      <div className="flex justify-between">
   <button
     onClick={() => {
@@ -369,7 +415,7 @@ const handleAddLanguage = async () => {
   </button>
 </div>
 
-    </>
+    </div>
   ) : (
     <>
       <div className="flex justify-between items-start">
@@ -395,18 +441,29 @@ const handleAddLanguage = async () => {
           </button>
         </div>
       </div>
-      <pre
+      <CodeEditor
+  value={snip.code}
+  language={snip.language.toLowerCase()}
+
+  padding={15}
+  readOnly
   onDoubleClick={(e) => {
-    e.stopPropagation(); // verhindert Maximize
+    e.stopPropagation();
     setEditingSnippetId(snip.id);
     setEditedTitle(snip.title);
     setEditedCode(snip.code);
   }}
-  className="bg-gray-200 dark:bg-gray-700 p-3 rounded text-sm overflow-x-auto max-h-32 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent cursor-pointer hover:ring-2 hover:ring-blue-500"
-  title="Doppelklick zum Bearbeiten"
->
-  <code>{snip.code}</code>
-</pre>
+  className="rounded bg-white dark:bg-gray-700 text-black dark:text-white max-h-32 overflow-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 cursor-pointer"
+  style={{
+    fontSize: 13,
+    fontFamily: 'ui-monospace, SFMono-Regular, SF Mono, Consolas, Liberation Mono, Menlo, monospace',
+    height: '100%',
+
+    overflow: 'auto',
+    backgroundColor,
+  }}
+/>
+
 
 
       
@@ -557,7 +614,13 @@ const handleAddLanguage = async () => {
 )}
 {expandedSnippet && (
   <div
-    onClick={() => setExpandedSnippet(null)}
+  onClick={() => {
+    if (modalEditMode) {
+      setModalEditMode(false);
+    }
+    setExpandedSnippet(null);
+  }}
+
     className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
   >
     <div
@@ -583,10 +646,10 @@ const handleAddLanguage = async () => {
           </button>
           <button
             onClick={() => {
-              setEditingSnippetId(expandedSnippet.id);
-              setEditedTitle(expandedSnippet.title);
-              setEditedCode(expandedSnippet.code);
-              setExpandedSnippet(null);
+            setModalEditMode(true);
+    setEditedTitle(expandedSnippet.title);
+    setEditedCode(expandedSnippet.code);
+              
             }}
             className="flex items-center gap-1 hover:text-blue-500"
             title="Edit"
@@ -606,22 +669,95 @@ const handleAddLanguage = async () => {
           </button>
         </div>
       </div>
-<div
-  className="overflow-y-auto max-h-[60vh] mt-4 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+{modalEditMode ? (
+  <div ref={editRef}>
+    <input
+      type="text"
+      value={editedTitle}
+      onChange={(e) => setEditedTitle(e.target.value)}
+      className="w-full mb-2 p-2 rounded bg-white dark:bg-gray-700 text-black dark:text-white"
+    />
+    <CodeEditor
+  value={editedCode}
+  language={expandedSnippet.language.toLowerCase()}
+
+
+  placeholder="Code eingeben..."
+  onChange={(e) => setEditedCode(e.target.value)}
+  padding={15}
+  className="rounded bg-gray-50 dark:bg-gray-700 text-black dark:text-white !important"
+  style={{
+    fontSize: 13,
+    fontFamily: 'ui-monospace, SFMono-Regular, SF Mono, Consolas, Liberation Mono, Menlo, monospace',
+    height: '60vh',
+    overflow: 'auto',
+    backgroundColor,
+  }}
+/>
+    <div className="flex justify-between">
+      <button
+        onClick={() => setModalEditMode(false)}
+        className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+      >
+        Cancel
+      </button>
+      <button
+        onClick={async () => {
+          const token = localStorage.getItem("token");
+          const resUpdate = await api.put(`/snippets/${expandedSnippet.id}`, {
+            title: editedTitle,
+            code: editedCode,
+            language: expandedSnippet.language,
+          }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          setSnippets(prev =>
+            prev.map(s => s.id === expandedSnippet.id ? resUpdate.data : s)
+          );
+          setModalEditMode(false);
+          setExpandedSnippet(resUpdate.data);
+        }}
+        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+      >
+        Save
+      </button>
+    </div>
+  </div>
+) : (
+  <div
+  className="scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
 >
-      <pre
-  onDoubleClick={() => {
-    setEditingSnippetId(expandedSnippet.id);
+
+  
+    <CodeEditor
+  value={expandedSnippet.code}
+  language={expandedSnippet.language.toLowerCase()}
+
+
+  padding={15}
+  readOnly
+  onDoubleClick={(e) => {
+    e.stopPropagation();
+    setModalEditMode(true);
     setEditedTitle(expandedSnippet.title);
     setEditedCode(expandedSnippet.code);
-    setExpandedSnippet(null); // Modal schließen
   }}
-  className="bg-gray-200 dark:bg-gray-700 p-4 rounded text-sm whitespace-pre-wrap cursor-pointer hover:ring-2 hover:ring-blue-500"
-  title="Doppelklick zum Bearbeiten"
->
-  <code>{expandedSnippet.code}</code>
-</pre>
-      </div>
+  className="rounded bg-white dark:bg-gray-700 text-black dark:text-white max-h-[60vh] overflow-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 cursor-pointer"
+  style={{
+    
+    fontSize: 13,
+   
+    fontFamily: 'ui-monospace, SFMono-Regular, SF Mono, Consolas, Liberation Mono, Menlo, monospace',
+    height: '100%',
+    overflow: 'auto',
+    backgroundColor,
+  }}
+/>
+
+  </div>
+)}
+
     </div>
   </div>
 )}
