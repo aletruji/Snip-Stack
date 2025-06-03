@@ -52,8 +52,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults()) // CORS erlauben
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/languages/**",
-                                "/api/user-languages**", "/api/user-languages/**").permitAll()
-                        .anyRequest().authenticated()
+                                "/api/user-languages**", "/api/user-languages/**", "/api/snippets/**").permitAll()
+                        //.anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         ;

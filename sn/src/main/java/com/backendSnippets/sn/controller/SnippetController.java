@@ -3,6 +3,8 @@ package com.backendSnippets.sn.controller;
 import com.backendSnippets.sn.model.Snippet;
 import com.backendSnippets.sn.repository.SnippetRepository;
 import com.backendSnippets.sn.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.backendSnippets.sn.model.User;
 
@@ -37,4 +39,22 @@ public class SnippetController {
         snippet.setUser(user);
         return snippetRepository.save(snippet);
     }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Snippet> updateSnippet(
+            @PathVariable Long id,
+            @RequestBody Snippet updatedSnippet) {
+
+        return snippetRepository.findById(id)
+                .map(snippet -> {
+                    snippet.setTitle(updatedSnippet.getTitle());
+                    snippet.setCode(updatedSnippet.getCode());
+                    snippet.setLanguage(updatedSnippet.getLanguage());
+                    Snippet saved = snippetRepository.save(snippet);
+                    return ResponseEntity.ok(saved);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

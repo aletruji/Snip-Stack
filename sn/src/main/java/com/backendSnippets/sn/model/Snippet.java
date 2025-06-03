@@ -14,6 +14,8 @@ public class Snippet {
     private User user;
 
     private String title;
+
+    @Column(columnDefinition = "LONGTEXT")
     private String code;
     private String language;
 

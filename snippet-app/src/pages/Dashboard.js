@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sun, Moon, Copy, Plus, Trash2, Edit  } from "lucide-react";
+import { Sun, Moon, Copy, Plus, Trash2, Edit, Maximize, Minimize  } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../api"
 
@@ -19,6 +19,15 @@ function Dashboard() {
   const [selectedFromDropdown, setSelectedFromDropdown] = useState("");
   const [contextMenuLang, setContextMenuLang] = useState(null);
   const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, langIdx: null });
+  const [editingSnippetId, setEditingSnippetId] = useState(null);
+  const [editedTitle, setEditedTitle] = useState("");
+const [editedCode, setEditedCode] = useState("");
+const [searchTerm, setSearchTerm] = useState("");
+const [expandedSnippet, setExpandedSnippet] = useState(null);
+
+
+
+
 
 
 
@@ -29,6 +38,36 @@ function Dashboard() {
    const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
   };
+  const handleSnippetChange = (id, field, value) => {
+  setSnippets((prevSnippets) =>
+    prevSnippets.map((snip) =>
+      snip.id === id ? { ...snip, [field]: value } : snip
+    )
+  );
+};
+
+const handleSaveSnippet = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const resUpdate = await api.put(`/snippets/${id}`, {
+      title: editedTitle,
+      code: editedCode,
+      language: snippets.find(s => s.id === id).language,
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    setSnippets(prev =>
+      prev.map(s => s.id === id ? resUpdate.data : s)
+    );
+    setEditingSnippetId(null);
+  } catch (err) {
+    alert("Fehler beim Speichern");
+    console.error(err);
+  }
+};
+
+
 
   
   useEffect(() => {
@@ -111,7 +150,13 @@ const handleAddSnippet = async () => {
         },
       }
     );
-    setSnippets(prev => [...prev, res.data]);
+    setSnippets(prev => [res.data, ...prev]);
+    setEditingSnippetId(res.data.id);
+    setEditedTitle(res.data.title);
+    setEditedCode(res.data.code);
+    
+
+
   } catch (err) {
     console.error("Create error:", err);
   }
@@ -149,10 +194,12 @@ const handleAddLanguage = async () => {
 
   {/* Middle: Search */}
   <input
-    type="text"
-    placeholder="Search snippets..."
-    className="w-1/2 px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-  />
+  type="text"
+  placeholder="Search snippets..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  className="w-1/2 px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
 
   {/* Right: Toggle + Logout */}
   <div className="flex items-center gap-3">
@@ -177,45 +224,55 @@ const handleAddLanguage = async () => {
 
       <div className="flex flex-grow overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-48 bg-gray-200 dark:bg-gray-800 p-4 flex flex-col justify-between">
-          <div>
-            <h2 className="font-semibold mb-4">Languages</h2>
-            <ul className="space-y-2">
-  <li
-    onClick={() => setSelectedLanguage(null)}
-    className={`p-2 rounded cursor-pointer ${
-      selectedLanguage === null ? 'bg-blue-500 text-white' : 'hover:bg-gray-300 dark:hover:bg-gray-700'
-    }`}
-  >
-    All
-  </li>
+<aside className="w-48 bg-gray-100 dark:bg-gray-900 p-4 flex flex-col justify-between h-[calc(100vh-100px)] shrink-0">
 
-  {languages.map((lang, idx) => (
-   <li
-    key={idx}
-    onClick={() => setSelectedLanguage(lang.name)}
-    onContextMenu={(e) => {
-      e.preventDefault();
-      setContextMenu({ visible: true, x: e.pageX, y: e.pageY, langIdx: idx });
-    }}
-    className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
-      selectedLanguage === lang.name ? 'bg-blue-500 text-white' : 'hover:bg-gray-300 dark:hover:bg-gray-700'
-    }`}
-  >
-    <span>{lang.logo}</span>
-    <span>{lang.name}</span>
-  </li>
-  ))}
-</ul>
+  {/* Oben: "All"-Button */}
+  <ul className="mb-2">
+    <li
+      onClick={() => setSelectedLanguage(null)}
+      className={`p-2 rounded cursor-pointer ${
+        selectedLanguage === null
+          ? 'bg-blue-500 text-white'
+          : 'hover:bg-gray-300 dark:hover:bg-gray-700'
+      }`}
+    >
+      All
+    </li>
+  </ul>
 
-          </div>
-          <button
-  onClick={handleAddLanguage}
-  className="mb-4 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2"
->
-  <Plus size={16} /> Add Language
-</button>
-        </aside>
+  {/* Scrollbarer Bereich für die Sprachen */}
+  <div className="overflow-y-auto pr-1 flex-1 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+    <ul className="space-y-2">
+      {languages.map((lang, idx) => (
+        <li
+          key={idx}
+          onClick={() => setSelectedLanguage(lang.name)}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            setContextMenu({ visible: true, x: e.pageX, y: e.pageY, langIdx: idx });
+          }}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded cursor-pointer text-base ${
+    selectedLanguage === lang.name
+      ? 'bg-blue-500 text-white'
+      : 'hover:bg-gray-300 dark:hover:bg-gray-700'
+  }`}
+        >
+          <span className="text-xl">{lang.logo}</span>
+          <span>{lang.name}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  {/* Unten: Add Language Button */}
+  <button
+    onClick={handleAddLanguage}
+    className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2"
+  >
+    <Plus size={16} /> Add Language
+  </button>
+</aside>
+
 
         {/* Main Snippet Area */}
         <main className="flex-grow p-6 overflow-y-auto max-h-[calc(100vh-100px)] scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
@@ -231,43 +288,153 @@ const handleAddLanguage = async () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {snippets.map((snip, idx) => (
-              <div
-                key={idx}
-                className="bg-gray-100 dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col justify-between min-h-[220px]"
-              >
-                <div className="flex justify-between items-start">
-  <h3 className="font-semibold mb-2">{snip.title}</h3>
-  <div className="flex gap-2">
+            {snippets
+  .filter(snip => {
+    const search = searchTerm.trim().toLowerCase();
+    const title = snip.title.toLowerCase();
+    const endsWithSpace = searchTerm.endsWith(" ");
+
+    const languageMatches = !selectedLanguage || snip.language === selectedLanguage;
+
+    if (!search) return languageMatches;
+
+    const escaped = search.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+    const pattern = endsWithSpace
+      ? `\\b${escaped}\\b`
+      : `\\b${escaped}`;
+
+    const titleMatches = new RegExp(pattern, 'i').test(title);
+
+    return languageMatches && titleMatches;
+  })
+   
+  
+
+  .map((snip, idx) => (
+             <div
+  key={idx}
+  onDoubleClick={() => setExpandedSnippet(snip)}
+  className="bg-gray-100 dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col justify-between min-h-[220px]"
+>
+  {editingSnippetId === snip.id ? (
+    <>
+      <input
+        type="text"
+        value={editedTitle}
+        onChange={(e) => setEditedTitle(e.target.value)}
+        className="w-full mb-2 p-2 rounded bg-white dark:bg-gray-700 text-black dark:text-white"
+      />
+      <textarea
+        value={editedCode}
+        onChange={(e) => setEditedCode(e.target.value)}
+        className="w-full mb-2 p-2 rounded bg-gray-100 dark:bg-gray-700 text-black dark:text-white h-32"
+      />
+     <div className="flex justify-between">
+  <button
+    onClick={() => {
+      // Wenn Snippet leer oder "New Snippet", wird er gelöscht
+      if (snip.title === "New Snippet" && snip.code === "// your code here") {
+        setSnippets(prev => prev.filter(s => s.id !== snip.id));
+      }
+      setEditingSnippetId(null);
+    }}
+    className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500"
+  >
+    Cancel
+  </button>
+  <button
+    onClick={async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const resUpdate = await api.put(`/snippets/${snip.id}`, {
+          title: editedTitle,
+          code: editedCode,
+          language: snip.language,
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setSnippets(prev =>
+          prev.map(s => s.id === snip.id ? resUpdate.data : s)
+        );
+        setEditingSnippetId(null);
+      } catch (err) {
+        alert("Fehler beim Speichern");
+        console.error(err);
+      }
+    }}
+    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+  >
+    Done
+  </button>
+</div>
+
+    </>
+  ) : (
+    <>
+      <div className="flex justify-between items-start">
+        <h3 className="font-semibold mb-2">{snip.title}</h3>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              setEditingSnippetId(snip.id);
+              setEditedTitle(snip.title);
+              setEditedCode(snip.code);
+            }}
+            className="text-blue-500 hover:text-blue-700"
+            title="Edit"
+          >
+            <Edit size={16} />
+          </button>
+          <button
+            onClick={() => handleDeleteSnippet(idx)}
+            className="text-red-500 hover:text-red-700"
+            title="Delete"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      </div>
+      <pre
+  onDoubleClick={(e) => {
+    e.stopPropagation(); // verhindert Maximize
+    setEditingSnippetId(snip.id);
+    setEditedTitle(snip.title);
+    setEditedCode(snip.code);
+  }}
+  className="bg-gray-200 dark:bg-gray-700 p-3 rounded text-sm overflow-x-auto max-h-32 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent cursor-pointer hover:ring-2 hover:ring-blue-500"
+  title="Doppelklick zum Bearbeiten"
+>
+  <code>{snip.code}</code>
+</pre>
+
+
+      
+     <div className="flex justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+  <span>{snip.language}</span>
+  <div className="flex items-center gap-2">
     <button
-      onClick={() => handleEditSnippet(idx)}
-      className="text-blue-500 hover:text-blue-700"
-      title="Edit"
+      onClick={() => setExpandedSnippet(snip)}
+      title="Maximieren"
+      className="flex items-center gap-1 hover:text-blue-500"
     >
-      <Edit size={16} />
+      <Maximize size={16} /> Max
     </button>
     <button
-      onClick={() => handleDeleteSnippet(idx)}
-      className="text-red-500 hover:text-red-700"
-      title="Delete"
+      onClick={() => copyToClipboard(snip.code)}
+      className="flex items-center gap-1 hover:text-blue-500"
     >
-      <Trash2 size={16} />
+      <Copy size={16} /> Copy
     </button>
   </div>
 </div>
-                <pre className="bg-gray-200 dark:bg-gray-700 p-3 rounded text-sm overflow-x-auto max-h-32">
-                  <code>{snip.code}</code>
-                </pre>
-                <div className="flex justify-between items-center mt-4 text-sm text-gray-600 dark:text-gray-400">
-                  <span>{snip.language}</span>
-                  <button
-                    onClick={() => copyToClipboard(snip.code)}
-                    className="flex items-center gap-1 hover:text-blue-500"
-                  >
-                    <Copy size={16} /> Copy
-                  </button>
-                </div>
-              </div>
+
+
+
+    </>
+  )}
+</div>
+
             ))}
           </div>
         </main>
@@ -287,17 +454,20 @@ const handleAddLanguage = async () => {
           <h3 className="text-lg font-bold mb-4">Add Language</h3>
 
           <select
-            className="w-full mb-2 p-2 rounded border bg-white text-black dark:bg-gray-700 dark:text-white"
-            value={selectedFromDropdown}
-            onChange={(e) => setSelectedFromDropdown(e.target.value)}
-          >
-            <option value="">-- Choose from list --</option>
-            {allLanguages.map((lang, idx) => (
-              <option key={idx} value={lang.name}>
-                {lang.logo} {lang.name}
-              </option>
-            ))}
-          </select>
+  className="w-full mb-2 p-2 rounded border bg-white text-black dark:bg-gray-700 dark:text-white scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600"
+  value={selectedFromDropdown}
+  onChange={(e) => setSelectedFromDropdown(e.target.value)}
+>
+  <option value="">-- Choose from list --</option>
+  {allLanguages
+    .filter(globalLang => !languages.some(userLang => userLang.name === globalLang.name))
+    .map((lang, idx) => (
+      <option key={idx} value={lang.name}>
+        {lang.logo} {lang.name}
+      </option>
+    ))}
+</select>
+
 
           <input
             type="text"
@@ -385,6 +555,77 @@ const handleAddLanguage = async () => {
     </li>
   </ul>
 )}
+{expandedSnippet && (
+  <div
+    onClick={() => setExpandedSnippet(null)}
+    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+    >
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-xl font-semibold">{expandedSnippet.title}</h3>
+        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <button
+            onClick={() => setExpandedSnippet(null)}
+            className="flex items-center gap-1 hover:text-blue-500"
+            title="Minimieren"
+          >
+            <Minimize size={16} /> Min
+          </button>
+          <button
+            onClick={() => copyToClipboard(expandedSnippet.code)}
+            className="flex items-center gap-1 hover:text-blue-500"
+            title="Copy"
+          >
+            <Copy size={16} /> Copy
+          </button>
+          <button
+            onClick={() => {
+              setEditingSnippetId(expandedSnippet.id);
+              setEditedTitle(expandedSnippet.title);
+              setEditedCode(expandedSnippet.code);
+              setExpandedSnippet(null);
+            }}
+            className="flex items-center gap-1 hover:text-blue-500"
+            title="Edit"
+          >
+            <Edit size={16} /> Edit
+          </button>
+          <button
+            onClick={() => {
+              const idx = snippets.findIndex(s => s.id === expandedSnippet.id);
+              if (idx !== -1) handleDeleteSnippet(idx);
+              setExpandedSnippet(null);
+            }}
+            className="flex items-center gap-1 hover:text-red-500"
+            title="Delete"
+          >
+            <Trash2 size={16} /> Delete
+          </button>
+        </div>
+      </div>
+<div
+  className="overflow-y-auto max-h-[60vh] mt-4 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+>
+      <pre
+  onDoubleClick={() => {
+    setEditingSnippetId(expandedSnippet.id);
+    setEditedTitle(expandedSnippet.title);
+    setEditedCode(expandedSnippet.code);
+    setExpandedSnippet(null); // Modal schließen
+  }}
+  className="bg-gray-200 dark:bg-gray-700 p-4 rounded text-sm whitespace-pre-wrap cursor-pointer hover:ring-2 hover:ring-blue-500"
+  title="Doppelklick zum Bearbeiten"
+>
+  <code>{expandedSnippet.code}</code>
+</pre>
+      </div>
+    </div>
+  </div>
+)}
+
 
   </div>
 );
