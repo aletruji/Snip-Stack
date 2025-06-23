@@ -1,15 +1,24 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
+import RegisterPage from "./pages/RegisterPage.js";
+import VerifyPage from "./pages/VerifyPage.js";
+
+
 
 function App() {
   return (
-    <Router>
-      <Routes>
+    <Routes>
+      
+        
         <Route path="/" element={<HomePage />} />
         <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </Router>
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify" element={<VerifyPage />} />
+        
+          
+      
+    </Routes>
   );
 }
 

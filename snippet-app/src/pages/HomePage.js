@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Eye, EyeOff } from "lucide-react";
 import api from "../api"; // falls noch nicht importiert
 
 
@@ -9,6 +9,10 @@ function HomePage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+
+  
 
 const handleLogin = async (e) => {
   e.preventDefault();
@@ -63,30 +67,40 @@ const handleLogin = async (e) => {
   type="email"
   value={email}
   onChange={(e) => setEmail(e.target.value)}
-  className="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  className="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none  focus:ring-blue-500"
   required
 />
           </div>
-          <div className="mb-6">
-            <label className="block mb-1 text-sm font-medium" htmlFor="password">
-              Password
-            </label>
-            <input
-  id="password"
-  type="password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  className="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-  required
-/>
+          <div className="mb-6 relative">
+  <label className="block mb-1 text-sm font-medium" htmlFor="password">
+    Password
+  </label>
+  <input
+    id="password"
+    type={showPassword ? "text" : "password"}
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    className="w-full px-4 py-2 pr-10 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none  focus:ring-blue-500"
+    required
+  />
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute inset-y-0 right-3 top-1/3 text-gray-500 dark:text-gray-300"
+    tabIndex={-1}
+  >
+    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+  </button>
+{/* Register Button */}
           </div>
           <div className="flex justify-between">
             <button
-              type="button"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
-            >
-              Register
-            </button>
+  type="button"
+  onClick={() => navigate("/register")}
+  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+>
+  Register
+</button>
             <button
               type="submit"
               className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
