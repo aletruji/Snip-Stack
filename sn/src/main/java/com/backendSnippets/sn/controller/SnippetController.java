@@ -5,8 +5,13 @@ import com.backendSnippets.sn.repository.SnippetRepository;
 import com.backendSnippets.sn.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import com.backendSnippets.sn.model.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 @RestController
@@ -22,20 +27,50 @@ public class SnippetController {
         this.userRepository = userRepository;
     }
 
-    // Alle Snippets eines Users
+    // all snippets from User
     @GetMapping
-    public List<Snippet> getSnippets(@RequestParam String email, @RequestParam(required = false) String language) {
-        User user = userRepository.findByEmail(email).orElseThrow();
-        if (language != null) {
-            return snippetRepository.findByUserAndLanguage(user, language);
+    public List<Snippet> getSnippets(@RequestParam(required = false) String language) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email;
+
+        if (principal instanceof UserDetails) {
+            email = ((UserDetails) principal).getUsername(); // Falls du UserDetails benutzt
+        } else if (principal instanceof User) {
+            email = ((User) principal).getEmail(); // Falls dein eigenes User-Objekt
+        } else {
+            throw new RuntimeException("Unbekannter Principal-Typ: " + principal);
         }
-        return snippetRepository.findByUser(user);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Benutzer mit E-Mail " + email + " nicht gefunden"));
+
+
+        if (language != null) {
+            return snippetRepository.findByUserIdAndLanguage(user.getId(), language);
+        }
+        return snippetRepository.findByUserId(user.getId());
     }
 
-    // Neues Snippet anlegen
+
+
     @PostMapping
-    public Snippet createSnippet(@RequestParam String email, @RequestBody Snippet snippet) {
-        User user = userRepository.findByEmail(email).orElseThrow();
+    public Snippet createSnippet(@RequestBody Snippet snippet) {
+       // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email;
+
+        if (principal instanceof UserDetails) {
+            email = ((UserDetails) principal).getUsername(); // Falls du UserDetails benutzt
+        } else if (principal instanceof User) {
+            email = ((User) principal).getEmail(); // Falls dein eigenes User-Objekt
+        } else {
+            throw new RuntimeException("Unbekannter Principal-Typ: " + principal);
+        }
+
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
         snippet.setUser(user);
         return snippetRepository.save(snippet);
     }

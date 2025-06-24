@@ -13,6 +13,18 @@ public class User {
     @Column(unique = true)
     private String email;
 
+
+    @Column(nullable = false)
+    private boolean verified = false;
+
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
     private String password;
 
     // Konstruktoren, Getter, Setter

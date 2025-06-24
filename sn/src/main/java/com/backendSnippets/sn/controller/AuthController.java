@@ -3,6 +3,8 @@ package com.backendSnippets.sn.controller;
 import com.backendSnippets.sn.jwt.JwtService;
 import com.backendSnippets.sn.model.User;
 import com.backendSnippets.sn.repository.UserRepository;
+import com.backendSnippets.sn.service.AuthService;
+import jakarta.persistence.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +17,8 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+
+
     @Autowired
     private UserRepository userRepository;
 
@@ -24,14 +28,29 @@ public class AuthController {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private AuthService authService;
+
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("User already exists");
+    public ResponseEntity<?> register(@RequestBody Map<String, String> user) {
+        try {
+            authService.register(user.get("email"), user.get("password"));
+            return ResponseEntity.ok("Verification code sent to email.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-        return ResponseEntity.ok("User registered");
+    }
+
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verify(@RequestBody Map<String, String> body) {
+        try {
+            System.out.println("Email: " + body.get("email") + ", Code: " + body.get("code"));
+            authService.verify(body.get("email"), body.get("code"));
+            return ResponseEntity.ok("User verified");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/login")
@@ -43,6 +62,10 @@ public class AuthController {
 
         if (!passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword())) {
             return ResponseEntity.status(401).body("Invalid credentials");
+        }
+
+        if (!foundUser.get().isVerified()) {
+            return ResponseEntity.status(403).body("Please verify your email before logging in");
         }
 
         String jwt = jwtService.generateToken(user.getEmail());
