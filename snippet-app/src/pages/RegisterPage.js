@@ -15,12 +15,11 @@ function RegisterPage() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/auth/register", { email, password });
-      // Redirect to verification page with email in URL
-     // navigate(/verify?email=${encodeURIComponent(email)});
-    } catch (err) {
-      alert("Registration failed. Please try again.");
-    }
+  await api.post("/auth/register", { email, password });
+  navigate(`/verify?email=${encodeURIComponent(email)}`);
+} catch (err) {
+  alert("Registration failed. Please try again.");
+}
   };
 
    useEffect(() => {

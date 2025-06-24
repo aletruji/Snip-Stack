@@ -18,14 +18,18 @@ function VerifyPage() {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  const handleVerify = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post("/auth/verify", { email, code });
-      navigate("/dashboard");
-    } catch (err) {
-      alert("Verification failed. Please try again.");
+ const handleVerify = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await api.post("/auth/verify", { email, code });
+    if (res.status === 200) {
+      alert("Verification successful!");
+      navigate("/"); // Login Seite oder Home
     }
+  } catch (err) {
+    console.error("Verify error:", err);
+    alert(err.response?.data || "Verification failed. Please try again.");
+  }
   };
 
   return (

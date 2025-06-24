@@ -118,10 +118,12 @@ useEffect(() => {
 
  useEffect(() => {
   if (!email) return;
-
-  api.get("/snippets", {
-    params: { email }
-  })
+//const token = localStorage.getItem("token");
+   api.get("/snippets", //{
+    //headers: {
+      //Authorization: `Bearer ${token}`
+    //}  }
+    )
     .then(res => {
       setSnippets(res.data);
     })
@@ -172,7 +174,7 @@ const handleAddSnippet = async () => {
 
   try {
     const res = await api.post(
-      `/snippets?email=${email}`,
+      "/snippets",
       newSnippet,
       {
         headers: {
