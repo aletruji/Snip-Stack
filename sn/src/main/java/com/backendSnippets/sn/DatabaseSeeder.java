@@ -18,7 +18,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (1 == 2) {
+        if (languageRepository.count() == 0) {
             languageRepository.saveAll(List.of(
                     new Language("Java", "☕"),
                     new Language("JavaScript", "🟨"),

@@ -15,6 +15,7 @@ public class DataInitializer {
         return args -> {
             if (userRepository.findByEmail("test@test.de").isEmpty()) {
                 User user = new User("test@test.de", passwordEncoder.encode("test123"));
+                user.setVerified(true);
                 userRepository.save(user);
                 System.out.println("🔐 Testnutzer erstellt: test@test.de / test123");
             }

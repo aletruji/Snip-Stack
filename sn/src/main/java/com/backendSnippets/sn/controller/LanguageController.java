@@ -9,7 +9,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/languages")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000",
+        "https://snippet-app.com"})
 public class LanguageController {
 
     private final LanguageRepository languageRepository;

@@ -9,7 +9,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user-languages")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {
+        "http://localhost:3000",
+        "https://snippet-app.com"
+})
 public class UserLanguageController {
 
     private final UserLanguageRepository repo;

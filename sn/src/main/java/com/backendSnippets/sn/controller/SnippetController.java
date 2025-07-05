@@ -16,7 +16,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 @RestController
 @RequestMapping("/api/snippets")
-@CrossOrigin(origins = "http://localhost:3000") // oder 3001 je nach Frontend
+@CrossOrigin(origins = {
+        "http://localhost:3000",
+        "https://snippet-app.com"
+})// oder 3001 je nach Frontend
 public class SnippetController {
 
     private final SnippetRepository snippetRepository;

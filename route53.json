@@ -1,0 +1,29 @@
+{
+  "Comment": "Route snippet-app.com and www.snippet-app.com to S3 buckets",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "snippet-app.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z3AQBSTGFYJSTF",
+          "DNSName": "snippet-app.com.s3-website.eu-central-1.amazonaws.com.",
+          "EvaluateTargetHealth": false
+        }
+      }
+    },
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "www.snippet-app.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z3AQBSTGFYJSTF",
+          "DNSName": "www.snippet-app.com.s3-website.eu-central-1.amazonaws.com.",
+          "EvaluateTargetHealth": false
+        }
+      }
+    }
+  ]
+}
