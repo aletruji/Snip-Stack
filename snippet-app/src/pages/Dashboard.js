@@ -104,7 +104,7 @@ useEffect(() => {
   }, [darkMode]);
 
 useEffect(() => {
-  fetch("http://localhost:8080/api/languages")
+  fetch("https://api.snippet-app.com/api")
     .then(res => res.json())
     .then(data => setAllLanguages(data)); // nur globale Dropdown-Sprachen
 }, []);

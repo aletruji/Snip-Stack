@@ -53,6 +53,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/auth/**",
                                 "/api/auth/**",
                                 "/api/languages/**",
                                 "/api/user-languages/**",
