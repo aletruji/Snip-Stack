@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sun, Moon, Eye, EyeOff } from "lucide-react";
-import api from "../api"; // falls noch nicht importiert
+import api from "../api";
 
 
 function HomePage() {
@@ -49,7 +49,7 @@ const handleLogin = async (e) => {
       </span>
         </button>
       </header>
-
+<div>{/* force rebuild: 2025-07-12 */}</div>
       {/* Main */}
       <main className="flex-grow flex flex-col items-center justify-center px-4">
         <h1 className="text-4xl font-bold mb-6">Welcome to SnippetApp</h1>

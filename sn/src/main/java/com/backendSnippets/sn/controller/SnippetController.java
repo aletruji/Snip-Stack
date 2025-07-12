@@ -78,6 +78,18 @@ public class SnippetController {
         return snippetRepository.save(snippet);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteSnippet(@PathVariable Long id) {
+        return snippetRepository.findById(id)
+                .map(snippet -> {
+                    snippetRepository.delete(snippet);
+                    return ResponseEntity.ok().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Snippet> updateSnippet(

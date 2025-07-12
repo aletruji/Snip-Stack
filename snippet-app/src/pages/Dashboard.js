@@ -42,8 +42,7 @@ const backgroundColor = darkMode ? "#374151" : "#ffffff"; // Tailwind: gray-800 
 
 
 
- 
-   const navigate = useNavigate();
+ const navigate = useNavigate();
    const email = localStorage.getItem("email");
    const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -196,11 +195,25 @@ const handleAddSnippet = async () => {
 
 
 
-  const handleDeleteSnippet = (index) => {
-    const updated = [...snippets];
-    updated.splice(index, 1);
-    setSnippets(updated);
-  };
+
+ const handleDeleteSnippet = async (id) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    await api.delete(`/snippets/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setSnippets(prev => prev.filter(s => s.id !== id));
+  } catch (err) {
+    console.error("Failed to delete snippet:", err);
+    alert("Failed to delete snippet");
+  }
+};
+
+
 
 const handleAddLanguage = async () => {
   try {
@@ -212,6 +225,7 @@ const handleAddLanguage = async () => {
     alert("Zugriff verweigert – bist du eingeloggt?");
   }
 };
+
 
 
 
@@ -435,7 +449,7 @@ const handleAddLanguage = async () => {
             <Edit size={16} />
           </button>
           <button
-            onClick={() => handleDeleteSnippet(idx)}
+            onClick={() => handleDeleteSnippet(snip.id)}
             className="text-red-500 hover:text-red-700"
             title="Delete"
           >
@@ -659,16 +673,16 @@ const handleAddLanguage = async () => {
             <Edit size={16} /> Edit
           </button>
           <button
-            onClick={() => {
-              const idx = snippets.findIndex(s => s.id === expandedSnippet.id);
-              if (idx !== -1) handleDeleteSnippet(idx);
-              setExpandedSnippet(null);
-            }}
-            className="flex items-center gap-1 hover:text-red-500"
-            title="Delete"
-          >
-            <Trash2 size={16} /> Delete
-          </button>
+  onClick={() => {
+    handleDeleteSnippet(expandedSnippet.id);
+    setExpandedSnippet(null);
+  }}
+  className="flex items-center gap-1 hover:text-red-500"
+  title="Delete"
+>
+  <Trash2 size={16} /> Delete
+</button>
+
         </div>
       </div>
 {modalEditMode ? (

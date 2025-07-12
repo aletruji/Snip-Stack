@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -61,7 +62,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             logger.info("Authenticating user: {}", email);
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    user, null, Collections.emptyList()
+                    user, null, List.of(() -> "ROLE_USER")
             );
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);

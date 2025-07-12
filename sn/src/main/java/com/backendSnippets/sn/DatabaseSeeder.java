@@ -34,6 +34,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     new Language("PHP", "🐘"),
                     new Language("Ruby", "💎"),
                     new Language("Scala", "🔺"),
+                    new Language("Terraform", "☁"),
                     new Language("Perl", "🦪"),
                     new Language("Shell", "📟"),
                     new Language("Bash", "💻"),
