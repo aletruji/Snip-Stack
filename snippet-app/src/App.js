@@ -3,11 +3,14 @@ import HomePage from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
 import RegisterPage from "./pages/RegisterPage.js";
 import VerifyPage from "./pages/VerifyPage.js";
+import { Toaster } from 'react-hot-toast';
 
 
 
 function App() {
   return (
+    <>
+      <Toaster position="top-center" />
     <Routes>
       
         
@@ -19,6 +22,7 @@ function App() {
           
       
     </Routes>
+    </>
   );
 }
 

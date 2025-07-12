@@ -3,6 +3,8 @@ import { Sun, Moon, Copy, Plus, Trash2, Edit, Maximize, Minimize  } from "lucide
 import { useNavigate } from "react-router-dom";
 import api from "../api"
 import CodeEditor from "@uiw/react-textarea-code-editor";
+import { toast } from 'react-hot-toast';
+
 
 
 
@@ -102,11 +104,7 @@ useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-useEffect(() => {
-  fetch("https://api.snippet-app.com/api")
-    .then(res => res.json())
-    .then(data => setAllLanguages(data)); // nur globale Dropdown-Sprachen
-}, []);
+
 
 
    useEffect(() => {
@@ -152,8 +150,8 @@ const handleAddSnippet = async () => {
   let language = selectedLanguage;
 
   if (!language) {
-    language = prompt("Bitte Sprache auswählen (z.B. Java, Python):");
-    if (!language) return;
+     toast.error("Please select a language from the sidebar first.");
+  return;
   }
 
   const email = localStorage.getItem("email");

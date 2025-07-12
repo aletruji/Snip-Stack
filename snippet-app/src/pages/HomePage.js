@@ -19,7 +19,7 @@ const handleLogin = async (e) => {
   try {
     const res = await api.post("/auth/login", { email, password });
     localStorage.setItem("token", res.data.token);
-    console.log("Aktueller Token im Interceptor:", res.data.token);
+    //console.log("Aktueller Token im Interceptor:", res.data.token);
     localStorage.setItem("email", email);
 
     navigate("/dashboard");
@@ -49,7 +49,7 @@ const handleLogin = async (e) => {
       </span>
         </button>
       </header>
-<div>{/* force rebuild: 2025-07-12 */}</div>
+
       {/* Main */}
       <main className="flex-grow flex flex-col items-center justify-center px-4">
         <h1 className="text-4xl font-bold mb-6">Welcome to SnippetApp</h1>
