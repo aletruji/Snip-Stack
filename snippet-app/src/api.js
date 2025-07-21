@@ -6,10 +6,10 @@ const isDev =
 
 const API_BASE_URL = isDev
   ? "http://localhost:8080/api"
-  : "https://api.snippet-app.com/api"
+  : "https://api.snipstack.net/api"
 
   //console.log("apiUrl verwendet:", API_BASE_URL);
-  console.log("force rebuild: 2025-07-12-5");
+  console.log("rebuild: 2025-07-21");
 
   
 

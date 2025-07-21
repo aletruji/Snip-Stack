@@ -1,7 +1,7 @@
 # Snippet-Full
 
 You can access the app at:
-https://snippet-app.com
+https://snipstack.net
 
 Test account:
 Email: test@mail.com

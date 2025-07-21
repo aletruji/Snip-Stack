@@ -11,7 +11,7 @@ import java.util.List;
 @RequestMapping("/api/user-languages")
 @CrossOrigin(origins = {
         "http://localhost:3000",
-        "https://snippet-app.com"
+        "https://snipstack.net"
 })
 public class UserLanguageController {
 

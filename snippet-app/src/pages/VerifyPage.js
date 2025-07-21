@@ -37,7 +37,7 @@ function VerifyPage() {
       
       {/* Navbar */}
       <header className="absolute top-0 left-0 w-full flex justify-between items-center p-4 shadow bg-gray-100 dark:bg-gray-800 rounded-b-2xl">
-        <div className="text-xl font-bold">🧩 SnippetApp</div>
+        <div className="text-xl font-bold">🧩 SnipStack</div>
         <button
           onClick={() => setDarkMode(!darkMode)}
           className="bg-gray-300 dark:bg-gray-700 px-3 py-2 rounded-full shadow flex items-center justify-center"

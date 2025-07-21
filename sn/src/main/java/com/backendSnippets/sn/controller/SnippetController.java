@@ -18,7 +18,7 @@ import java.util.List;
 @RequestMapping("/api/snippets")
 @CrossOrigin(origins = {
         "http://localhost:3000",
-        "https://snippet-app.com"
+        "https://snipstack.net"
 })// oder 3001 je nach Frontend
 public class SnippetController {
 

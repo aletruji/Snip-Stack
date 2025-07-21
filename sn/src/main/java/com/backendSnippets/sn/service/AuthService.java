@@ -38,10 +38,15 @@ public class AuthService {
         codeRepo.save(new VerificationCode(email, code, LocalDateTime.now()));
 
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(email);
-        msg.setSubject("Your SnippetApp Verification Code");
-        msg.setText("Here is your verification code: " + code);
-        mailSender.send(msg);
+        try {
+            msg.setTo(email);
+            msg.setSubject("Your SnippetApp Verification Code");
+            msg.setText("Here is your verification code: " + code);
+            mailSender.send(msg);
+        } catch (Exception e) {
+            System.err.println("Mailversand fehlgeschlagen: " + e.getMessage());
+            e.printStackTrace(); // für volle Fehlermeldung
+        }
     }
     @Transactional
         public void verify(String email, String code) {

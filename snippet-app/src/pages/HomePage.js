@@ -38,7 +38,7 @@ const handleLogin = async (e) => {
     <div className="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 relative">
       {/* Navbar */}
       <header className="flex justify-between items-center p-4 shadow bg-gray-100 dark:bg-gray-800 rounded-b-2xl">
-        <div className="text-xl font-bold">🧩 SnippetApp</div>
+        <div className="text-xl font-bold">🧩 SnipStack</div>
         <button
           onClick={() => setDarkMode(!darkMode)}
           className="bg-gray-300 dark:bg-gray-700 px-3 py-2 rounded-full shadow flex items-center justify-center"
@@ -52,7 +52,7 @@ const handleLogin = async (e) => {
 
       {/* Main */}
       <main className="flex-grow flex flex-col items-center justify-center px-4">
-        <h1 className="text-4xl font-bold mb-6">Welcome to SnippetApp</h1>
+        <h1 className="text-4xl font-bold mb-6">Welcome to SnipStack</h1>
 
         <form
           onSubmit={handleLogin}
